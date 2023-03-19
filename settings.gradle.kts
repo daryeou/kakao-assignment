@@ -18,3 +18,9 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = "kakao"
 include(":app")
+include(":core:designsystem")
+include(":core:data")
+include(":core:domain")
+include(":core:network")
+include(":core:model")
+include(":core:sharedpreference")
