@@ -76,6 +76,7 @@ fastlane/readme.md
 
 # sonarlint
 /.idea/sonarlint/issuestore/
+/.idea/sonarlint/securityhotspotstore/
 
 # Version control
 vcs.xml
