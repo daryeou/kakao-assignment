@@ -3,10 +3,10 @@ package com.daryeou.app.core.data.repository
 import com.daryeou.app.core.data.mapper.KakaoSearchMapper.toDomain
 import com.daryeou.app.core.data.source.local.KakaoFavoriteMediaDataSource
 import com.daryeou.app.core.data.source.remote.KakaoSearchDataSource
+import com.daryeou.app.core.data.util.safeFlow
 import com.daryeou.app.core.domain.entities.kakao.search.KakaoImageSearchEntity
 import com.daryeou.app.core.domain.entities.kakao.search.KakaoVideoSearchEntity
 import com.daryeou.app.core.domain.model.ApiResult
-import com.daryeou.app.core.domain.model.safeFlow
 import com.daryeou.app.core.domain.repository.KakaoSearchRepo
 import com.daryeou.app.core.domain.repository.KakaoSearchSortType
 import com.daryeou.app.core.model.kakao.KakaoSearchResultItem
