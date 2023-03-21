@@ -2,7 +2,7 @@
 # androidx
 androidxActivity = "1.6.1"
 androidxCore = "1.9.0"
-androidxLifecycle = "2.6.0"
+androidxWork = "2.8.0"
 
 # coil
 coil = "2.2.2"
@@ -11,6 +11,10 @@ coil = "2.2.2"
 androidxComposeBom = "2023.01.00"
 androidxComposeCompiler = "1.4.1"
 androidxComposeRuntimeTracing = "1.0.0-alpha01"
+androidxComposeConstraintlayout = "1.0.1"
+androidxComposeNavigation = "2.5.3"
+androidxComposeRuntimePaging = "3.1.1"
+androidxComposePaging = "1.0.0-alpha18"
 
 # gradle
 androidGradlePlugin = "8.0.0-alpha09"
@@ -27,6 +31,9 @@ kotlinxSerializationJson = "1.4.1"
 
 # ksp
 ksp = "1.8.0-1.0.9"
+
+# lifecycle
+androidxLifecycle = "2.6.0"
 
 # retrofit2
 okhttp3 = "4.10.0"
@@ -58,7 +65,9 @@ secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugi
 # androidx
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
-androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "androidxLifecycle" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidxWork" }
+androidx-runtime-paging = { group = "androidx.paging", name = "paging-runtime", version.ref = "androidxComposeRuntimePaging" }
+
 
 # coil
 coil-kt = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
@@ -67,6 +76,7 @@ coil-kt-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
 
 # compose
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
+androidx-compose-animation = { group = "androidx.compose.animation", name = "animation" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout" }
 androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
@@ -75,16 +85,23 @@ androidx-compose-material3-windowSizeClass = { group = "androidx.compose.materia
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata" }
 androidx-compose-runtime-tracing = { group = "androidx.compose.runtime", name = "runtime-tracing", version.ref = "androidxComposeRuntimeTracing" }
+androidx-compose-viewbinding = { group = "androidx.compose.ui", name = "ui-viewbinding" }
 androidx-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-ui-testManifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-ui-util = { group = "androidx.compose.ui", name = "ui-util" }
 
-# hilt
+androidx-compose-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidxLifecycle" }
+androidx-compose-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "androidxComposeConstraintlayout" }
+androidx-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "androidxComposeNavigation" }
+androidx-compose-paging = { group = "androidx.paging", name = "paging-compose", version.ref = "androidxComposePaging" }
+
+# dagger hilt
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+
 hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltExt" }
 hilt-ext-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltExt" }
 hilt-ext-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHiltNavigationCompose" }
@@ -115,14 +132,20 @@ androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espres
 
 [bundles]
 androidx-compose = [
+    "androidx-compose-animation",
     "androidx-compose-foundation",
     "androidx-compose-foundation-layout",
+    "androidx-compose-lifecycle-runtime",
     "androidx-compose-material-iconsExtended",
     "androidx-compose-material3",
     "androidx-compose-material3-windowSizeClass",
     "androidx-compose-runtime",
     "androidx-compose-runtime-livedata",
     "androidx-compose-runtime-tracing",
+    "androidx-compose-viewbinding",
+    "androidx-compose-constraintlayout",
+    "androidx-compose-navigation",
+    "androidx-compose-paging",
     "androidx-compose-ui-tooling-preview",
     "androidx-compose-ui-util",
 ]
