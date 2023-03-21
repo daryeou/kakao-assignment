@@ -1,6 +1,13 @@
 package com.daryeou.app.core.designsystem.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+
+val ColorScheme.border: Color
+    @Composable
+    get() = if (!isSystemInDarkTheme()) md_theme_light_outline else md_theme_dark_outline
 
 val md_theme_light_primary = Color(0xFF00696F)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
@@ -28,7 +35,6 @@ val md_theme_light_outline = Color(0xFF6F797A)
 val md_theme_light_inverseOnSurface = Color(0xFFEFF1F1)
 val md_theme_light_inverseSurface = Color(0xFF2D3131)
 val md_theme_light_inversePrimary = Color(0xFF4CD9E3)
-val md_theme_light_shadow = Color(0xFF000000)
 val md_theme_light_surfaceTint = Color(0xFF00696F)
 val md_theme_light_outlineVariant = Color(0xFFBEC8C9)
 val md_theme_light_scrim = Color(0xFF000000)
@@ -59,10 +65,8 @@ val md_theme_dark_outline = Color(0xFF899393)
 val md_theme_dark_inverseOnSurface = Color(0xFF191C1C)
 val md_theme_dark_inverseSurface = Color(0xFFE0E3E3)
 val md_theme_dark_inversePrimary = Color(0xFF00696F)
-val md_theme_dark_shadow = Color(0xFF000000)
 val md_theme_dark_surfaceTint = Color(0xFF4CD9E3)
 val md_theme_dark_outlineVariant = Color(0xFF3F4849)
 val md_theme_dark_scrim = Color(0xFF000000)
-
 
 val seed = Color(0xFF00696F)

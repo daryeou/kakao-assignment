@@ -1,9 +1,9 @@
 package com.daryeou.app.core.domain.repository
 
-import com.daryeou.app.core.domain.entities.kakao.search.KakaoImageSearchEntity
-import com.daryeou.app.core.domain.entities.kakao.search.KakaoVideoSearchEntity
+import com.daryeou.app.core.domain.entities.kakao.favorite.KakaoFavoriteEntity
+import com.daryeou.app.core.domain.entities.kakao.search.KakaoSearchEntity
 import com.daryeou.app.core.domain.model.ApiResult
-import com.daryeou.app.core.model.kakao.KakaoSearchResultItem
+import com.daryeou.app.core.model.kakao.KakaoSearchMediaBasicData
 import kotlinx.coroutines.flow.Flow
 
 interface KakaoSearchRepo {
@@ -12,20 +12,20 @@ interface KakaoSearchRepo {
         sort: KakaoSearchSortType,
         page: Int,
         size: Int
-    ): Flow<ApiResult<KakaoImageSearchEntity>>
+    ): Flow<ApiResult<KakaoSearchEntity>>
 
     fun getKakaoVideoSearchList(
         query: String,
         sort: KakaoSearchSortType,
         page: Int,
         size: Int
-    ): Flow<ApiResult<KakaoVideoSearchEntity>>
+    ): Flow<ApiResult<KakaoSearchEntity>>
 
-    fun getKakaoFavoriteItemList(): Flow<List<KakaoSearchResultItem>>
+    fun getKakaoFavoriteItemList(): Flow<KakaoFavoriteEntity>
 
-    suspend fun addKakaoFavoriteItem(searchResultItem: KakaoSearchResultItem)
+    suspend fun addKakaoFavoriteItem(searchResultItem: KakaoSearchMediaBasicData)
 
-    suspend fun removeKakaoFavoriteItem(searchResultItem: KakaoSearchResultItem)
+    suspend fun removeKakaoFavoriteItem(searchResultItem: KakaoSearchMediaBasicData)
 }
 
 enum class KakaoSearchSortType(val value: String) {

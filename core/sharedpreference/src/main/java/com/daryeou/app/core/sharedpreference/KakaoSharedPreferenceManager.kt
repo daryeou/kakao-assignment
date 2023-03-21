@@ -8,7 +8,7 @@ class KakaoSharedPreferencesManager @Inject constructor(
     private val instance: SharedPreferences
 ) {
     fun getFavoriteJsonString(): String =
-        instance.getString(FAVORITE_MEDIA_JSON_STRING, null) ?: ""
+        instance.getString(FAVORITE_MEDIA_JSON_STRING, "") ?: ""
 
     fun updateFavoriteJsonString(jsonString: String) {
         instance.edit {
