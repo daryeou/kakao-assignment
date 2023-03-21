@@ -41,6 +41,9 @@ retrofit = "2.9.0"
 retrofitSerialization = "0.8.0"
 gson = "2.9.0"
 
+# lottie
+lottieCompose = "5.2.0"
+
 # secretGradlePlugin
 secretGradlePlugin = "2.0.1"
 
@@ -67,7 +70,6 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidxWork" }
 androidx-runtime-paging = { group = "androidx.paging", name = "paging-runtime", version.ref = "androidxComposeRuntimePaging" }
-
 
 # coil
 coil-kt = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
@@ -119,6 +121,9 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 # retrofit2 serialization
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 retrofit-serialization = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "retrofitSerialization" }
+
+# lottie
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottieCompose" }
 
 # test
 junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
