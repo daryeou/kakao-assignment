@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kakao_search_idle_description">카카오\n미디어\n검색</string>
+
+    <string name="kakao_search_media_item_empty">검색 결과가 없습니다.</string>
+    <string name="kakao_search_media_item_loading">데이터를 불러오는 중입니다.</string>
+    <string name="kakao_search_media_item_last">마지막 페이지입니다.</string>
+    <string name="kakao_search_media_item_error">데이터를 불러오는 중 오류가 발생했습니다.</string>
+
+    <string name="kakao_search_query_length_error">검색어는 1 글자 이상 입력해주세요.</string>
+</resources>
