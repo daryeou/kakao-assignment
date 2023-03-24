@@ -16,7 +16,7 @@
         android:theme="@style/Theme.App"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".KakaoActivity"
             android:exported="true"
             android:theme="@style/Theme.App">
             <intent-filter>

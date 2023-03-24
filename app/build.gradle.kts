@@ -26,11 +26,18 @@ android {
     buildTypes {
         getByName("debug") {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
         getByName("release") {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -39,6 +46,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs = listOf("-Xcontext-receivers")
     }
     buildFeatures {
         compose = true
@@ -62,7 +70,13 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.data)
+    implementation(projects.core.designsystem)
+    implementation(projects.feature.kakaosearch)
+    implementation(projects.feature.kakaofavorite)
+
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.activity.compose)
 
     implementation(platform(libs.androidx.compose.bom))
