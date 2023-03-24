@@ -1,10 +1,12 @@
 package com.daryeou.app.core.domain.usecase.kakao.search
 
+import android.util.Log
+import com.daryeou.app.core.domain.entities.kakao.search.KakaoSearchEntity
 import com.daryeou.app.core.domain.model.ApiResult
 import com.daryeou.app.core.domain.repository.KakaoSearchRepo
 import com.daryeou.app.core.domain.repository.KakaoSearchSortType
 import com.daryeou.app.core.model.kakao.KakaoSearchMediaBasicData
-import com.daryeou.app.core.model.kakao.KakaoSearchMediaDetailData
+import com.daryeou.app.core.model.kakao.KakaoSearchMediaItemData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +16,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+private data class KakaoMediaSearchApiState(
+    var nextPage: Int = 1,
+    var pageable: Boolean = true,
+    var mediaList: MutableList<KakaoSearchMediaBasicData> = mutableListOf(),
+    var apiFlow: Flow<ApiResult<KakaoSearchEntity>>? = null,
+)
+
 class GetKakaoMediaSearchSortedResult @Inject constructor(
     private val kakaoSearchRepo: KakaoSearchRepo
 ) {
@@ -22,31 +31,21 @@ class GetKakaoMediaSearchSortedResult @Inject constructor(
 
     private lateinit var favoriteMediaList: List<KakaoSearchMediaBasicData>
 
-    private var kakaoSearchImagePage = 1
-    private var kakaoSearchVideoPage = 1
+    private var imageSearchApiState: KakaoMediaSearchApiState = KakaoMediaSearchApiState()
+    private var videoSearchApiState: KakaoMediaSearchApiState = KakaoMediaSearchApiState()
 
-    private var kakaoSearchImagePageable = true
-    private var kakaoSearchVideoPageable = true
-
-    private val kakaoSearchImageList: MutableList<KakaoSearchMediaBasicData> = mutableListOf()
-    private val kakaoSearchVideoList: MutableList<KakaoSearchMediaBasicData> = mutableListOf()
-
-    private val kakaoSearchMixedListSorted = mutableListOf<KakaoSearchMediaDetailData>()
+    private val kakaoSearchMixedListSorted = mutableListOf<KakaoSearchMediaItemData>()
 
     operator fun invoke(
         page: Int,
         pageSize: Int = currentPageSize,
         query: String = currentQuery,
-    ): Flow<ApiResult<List<KakaoSearchMediaDetailData>>> = channelFlow {
+    ): Flow<ApiResult<List<KakaoSearchMediaItemData>>> = channelFlow {
         if (currentQuery != query) {
             currentPageSize = pageSize
             currentQuery = query
-            kakaoSearchImagePage = 1
-            kakaoSearchVideoPage = 1
-            kakaoSearchImagePageable = true
-            kakaoSearchVideoPageable = true
-            kakaoSearchImageList.clear()
-            kakaoSearchVideoList.clear()
+            imageSearchApiState = KakaoMediaSearchApiState()
+            videoSearchApiState = KakaoMediaSearchApiState()
             kakaoSearchMixedListSorted.clear()
 
             // Get favorite media list
@@ -58,107 +57,92 @@ class GetKakaoMediaSearchSortedResult @Inject constructor(
         // Combine two search result
         while (kakaoSearchMixedListSorted.size < page * pageSize) {
             // Check if both image and video are not pageable
-            if (!kakaoSearchImagePageable && !kakaoSearchVideoPageable) {
+            if (!imageSearchApiState.pageable && !videoSearchApiState.pageable) {
                 break
             }
 
-            // Get search result
-            val kakaoImageSearchFlow = kakaoSearchRepo.getKakaoImageSearchList(
+            imageSearchApiState.apiFlow = kakaoSearchRepo.getKakaoImageSearchList(
                 query,
                 KakaoSearchSortType.RECENCY,
-                kakaoSearchImagePage,
+                imageSearchApiState.nextPage,
                 80
             )
-            val kakaoVideoSearchFlow = kakaoSearchRepo.getKakaoVideoSearchList(
+            videoSearchApiState.apiFlow = kakaoSearchRepo.getKakaoVideoSearchList(
                 query,
                 KakaoSearchSortType.RECENCY,
-                kakaoSearchVideoPage,
+                videoSearchApiState.nextPage,
                 30
             )
 
             withContext(Dispatchers.IO) {
-                launch {
-                    // Get image search result
-                    if (kakaoSearchImagePageable) {
-                        if (kakaoSearchImageList.isNotEmpty()) {
-                            return@launch
-                        }
-                        kakaoImageSearchFlow.collectLatest { apiResult ->
-                            if (apiResult is ApiResult.Success) {
-                                kakaoSearchImageList.addAll(apiResult.value.itemList)
-                                kakaoSearchImagePage++
-                                if (apiResult.value.isEnd) {
-                                    kakaoSearchImagePageable = false
+                listOf(
+                    imageSearchApiState,
+                    videoSearchApiState,
+                ).forEach {  apiState ->
+                    launch {
+                        apiState.apply {
+                            // Get image search result
+                            if (pageable) {
+                                if (mediaList.isNotEmpty()) {
+                                    return@launch
                                 }
-                            } else {
-                                if (apiResult is ApiResult.Error) {
-                                    send(apiResult)
-                                    kakaoSearchImagePageable = false
-                                } else if (apiResult is ApiResult.Exception) {
-                                    send(apiResult)
+                                apiFlow?.collectLatest { apiResult ->
+                                    if (apiResult is ApiResult.Success) {
+                                        mediaList.addAll(apiResult.value.itemList)
+                                        nextPage++
+                                        if (apiResult.value.isEnd) {
+                                            pageable = false
+                                        }
+                                    } else {
+                                        /**
+                                         * If there is an error, cancel the flow
+                                         * and return the error to the UI
+                                         */
+                                        if (apiResult is ApiResult.Error) {
+                                            send(apiResult)
+                                            pageable = false
+                                        } else if (apiResult is ApiResult.Exception) {
+                                            send(apiResult)
+                                        }
+                                        this@channelFlow.cancel()
+                                    }
                                 }
-                                this@channelFlow.cancel()
-                            }
-                        }
-                    }
-                }
-                launch {
-                    // Get video search result
-                    if (kakaoSearchVideoPageable) {
-                        if (kakaoSearchVideoList.isNotEmpty()) {
-                            return@launch
-                        }
-                        kakaoVideoSearchFlow.collectLatest { apiResult ->
-                            if (apiResult is ApiResult.Success) {
-                                kakaoSearchVideoList.addAll(apiResult.value.itemList)
-                                kakaoSearchVideoPage++
-                                if (apiResult.value.isEnd) {
-                                    kakaoSearchVideoPageable = false
-                                }
-                            } else {
-                                if (apiResult is ApiResult.Error) {
-                                    send(apiResult)
-                                    kakaoSearchVideoPageable = false
-                                } else if (apiResult is ApiResult.Exception) {
-                                    send(apiResult)
-                                }
-                                this@channelFlow.cancel()
                             }
                         }
                     }
                 }
             }
 
-            val tempMixedList = mutableListOf<KakaoSearchMediaDetailData>()
+            val tempMixedList = mutableListOf<KakaoSearchMediaItemData>()
             lateinit var hasLessDateType: MutableList<KakaoSearchMediaBasicData>
             lateinit var hasMoreDateType: MutableList<KakaoSearchMediaBasicData>
 
-            if (kakaoSearchImageList.isEmpty() && kakaoSearchVideoList.isEmpty()) {
+            val imageList = imageSearchApiState.mediaList
+            val videoList = videoSearchApiState.mediaList
+
+            if (imageList.isEmpty() && videoList.isEmpty()) {
                 break
-            } else if (kakaoSearchImageList.isEmpty()) {
-                hasLessDateType = kakaoSearchVideoList
+            } else if (imageList.isEmpty()) {
+                hasLessDateType = videoList
                 hasMoreDateType = arrayListOf()
-            } else if (kakaoSearchVideoList.isEmpty()) {
-                hasLessDateType = kakaoSearchImageList
+            } else if (videoList.isEmpty()) {
+                hasLessDateType = imageList
                 hasMoreDateType = arrayListOf()
-            } else if (kakaoSearchImageList.last().dateTime > kakaoSearchVideoList.last().dateTime) {
-                hasLessDateType = kakaoSearchImageList
-                hasMoreDateType = kakaoSearchVideoList
+            } else if (imageList.last().dateTime > videoList.last().dateTime) {
+                hasLessDateType = imageList
+                hasMoreDateType = videoList
             } else {
-                hasLessDateType = kakaoSearchVideoList
-                hasMoreDateType = kakaoSearchImageList
+                hasLessDateType = videoList
+                hasMoreDateType = imageList
             }
             val lastDateTime = hasLessDateType.last().dateTime
 
             // Add last date type to mixed list, and remove it from original list
             hasLessDateType.forEach { basicData ->
                 tempMixedList.add(
-                    KakaoSearchMediaDetailData(
+                    KakaoSearchMediaItemData(
                         favoriteMediaList.contains(basicData),
-                        KakaoSearchMediaBasicData(
-                            basicData.thumbnailUrl,
-                            basicData.dateTime,
-                        )
+                        basicData,
                     )
                 )
             }
@@ -168,12 +152,9 @@ class GetKakaoMediaSearchSortedResult @Inject constructor(
             hasMoreDateType.toList().forEach { basicData ->
                 if (basicData.dateTime > lastDateTime) {
                     tempMixedList.add(
-                        KakaoSearchMediaDetailData(
+                        KakaoSearchMediaItemData(
                             favoriteMediaList.contains(basicData),
-                            KakaoSearchMediaBasicData(
-                                basicData.thumbnailUrl,
-                                basicData.dateTime,
-                            )
+                            basicData,
                         )
                     )
                     hasMoreDateType.remove(basicData)
@@ -189,13 +170,22 @@ class GetKakaoMediaSearchSortedResult @Inject constructor(
         }
 
         // Send result
-        send(
-            ApiResult.Success(
-                kakaoSearchMixedListSorted.subList(
-                    (page - 1) * pageSize,
-                    (page * pageSize).coerceAtMost(kakaoSearchMixedListSorted.size)
+        if (kakaoSearchMixedListSorted.size >= (page - 1) * pageSize) {
+            send(
+                ApiResult.Success(
+                    kakaoSearchMixedListSorted.subList(
+                        (page - 1) * pageSize,
+                        (page * pageSize).coerceAtMost(kakaoSearchMixedListSorted.size)
+                    ).toList()
                 )
             )
-        )
+        } else {
+            send(
+                ApiResult.Success(
+                    emptyList()
+                )
+            )
+        }
+
     }
 }
