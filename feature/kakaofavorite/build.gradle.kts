@@ -9,6 +9,7 @@ plugins {
 android {
     namespace = "com.daryeou.app.feature.kakaofavorite"
     compileSdk = 33
+
     defaultConfig {
         minSdk = 24
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -25,6 +26,7 @@ dependencies {
     implementation(projects.core.designsystem)
     implementation(projects.core.domain)
     implementation(projects.core.ui)
+    implementation(projects.core.model)
 
     implementation(libs.androidx.core.ktx)
 
@@ -39,6 +41,8 @@ dependencies {
     implementation(libs.hilt.ext.work)
     implementation(libs.hilt.ext.navigation.compose)
     kapt(libs.hilt.ext.compiler)
+
+    implementation(libs.lottie.compose)
 
     testImplementation(libs.junit4)
 

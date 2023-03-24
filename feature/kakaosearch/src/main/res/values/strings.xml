@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="kakao_search">Search</string>
     <string name="kakao_search_idle_description">카카오\n미디어\n검색</string>
 
     <string name="kakao_search_media_item_empty">검색 결과가 없습니다.</string>

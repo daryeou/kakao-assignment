@@ -9,6 +9,7 @@ plugins {
 android {
     namespace = "com.daryeou.app.feature.kakaosearch"
     compileSdk = 33
+
     defaultConfig {
         minSdk = 24
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

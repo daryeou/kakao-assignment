@@ -13,13 +13,13 @@ fun NavController.navigateToKakaoSearch(navOptions: NavOptionsBuilder.() -> Unit
 }
 
 fun NavGraphBuilder.kakaoSearchScreen(
-    onError: (String) -> Unit,
+    showSnackbar: (String) -> Unit,
 ) {
     composable(
         route = kakaoSearchNavigationRoute,
     ) { _ ->
         KakaoSearchRoute(
-            onShowSnackbar = onError,
+            showSnackbar = showSnackbar,
         )
     }
 }

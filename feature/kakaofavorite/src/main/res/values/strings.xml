@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kakao_favorite">Favorite</string>
+    <string name="kakao_favorite_title">\'좋아요\'를 누른 미디어 목록</string>
+    <string name="kakao_favorite_empty">\'좋아요\'를 누른 미디어가 없습니다.</string>
+    <string name="kakao_favorite_media_item_last">\Made by daryeou@gmail.com</string>
+</resources>

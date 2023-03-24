@@ -34,23 +34,25 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.daryeou.app.core.designsystem.component.LoadingWheel
 import com.daryeou.app.core.designsystem.icon.AppIcons
 import com.daryeou.app.core.designsystem.theme.AppTheme
 import com.daryeou.app.core.model.kakao.KakaoSearchMediaBasicData
-import com.daryeou.app.core.model.kakao.KakaoSearchMediaDetailData
+import com.daryeou.app.core.model.kakao.KakaoSearchMediaItemData
+import com.daryeou.app.core.model.kakao.KakaoSearchMediaType
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 internal fun KakaoSearchScreen(
+    kakaoSearchState: KakaoSearchUiState,
     kakaoSearchMediaListState: KakaoSearchMediaListState,
-    kakaoSearchState: KakaoSearchState,
     queryValue: String,
     onTextInputEvent: (String) -> Unit,
     onQuery: (String) -> Unit,
     onNextPage: () -> Unit,
-    onClickImage: (KakaoSearchMediaDetailData) -> Unit,
-    onClickFavorite: (KakaoSearchMediaDetailData) -> Unit,
+    onClickLink: (KakaoSearchMediaItemData) -> Unit,
+    onClickFavorite: (KakaoSearchMediaItemData) -> Unit,
     onSearchError: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -87,26 +89,30 @@ internal fun KakaoSearchScreen(
         )
 
         when (kakaoSearchState) {
-            KakaoSearchState.IDLE -> {
+            KakaoSearchUiState.IDLE -> {
                 KakaoSearchIdleColumn()
             }
 
-            KakaoSearchState.EMPTY -> {
-                KakaoSearchEmptyColumn()
+            KakaoSearchUiState.LOADING -> {
+                LoadingWheel()
             }
 
-            KakaoSearchState.ERROR -> {
+            KakaoSearchUiState.EMPTY -> {
+                KakaoSearchEmpty()
+            }
+
+            KakaoSearchUiState.ERROR -> {
                 onSearchError()
             }
 
-            KakaoSearchState.SHOW_RESULT -> {
-                KakaoSearchResultGrid(
+            KakaoSearchUiState.SHOW_RESULT -> {
+                KakaoSearchResultColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
                     kakaoMediaItemList = kakaoSearchMediaListState,
                     onNextPage = onNextPage,
-                    onClickImage = onClickImage,
+                    onClickLink = onClickLink,
                     onClickFavorite = onClickFavorite,
                 )
             }
@@ -134,7 +140,7 @@ private fun KakaoSearchIdleColumn() {
 }
 
 @Composable
-private fun KakaoSearchEmptyColumn() {
+private fun KakaoSearchEmpty() {
     val emptyLottieComposition by rememberLottieComposition(
         spec = LottieCompositionSpec.RawRes(R.raw.lottie_empty)
     )
@@ -183,35 +189,41 @@ internal fun KakaoSearchScreenPreview() {
                     pageable = true,
                     page = 1,
                     mediaList = MutableList(10) {
-                        KakaoSearchMediaDetailData(
+                        KakaoSearchMediaItemData(
                             isFavorite = false,
                             mediaInfo = KakaoSearchMediaBasicData(
+                                title = "title",
+                                url = "https://www.naver.com",
                                 thumbnailUrl = "https://pbs.twimg.com/media/Frj3K70akAAurBa?format=jpg&name=small",
                                 dateTime = Date(),
+                                mediaType = KakaoSearchMediaType.IMAGE,
                             )
                         )
                     }.apply {
                         addAll(
                             MutableList(10) {
-                                KakaoSearchMediaDetailData(
+                                KakaoSearchMediaItemData(
                                     isFavorite = true,
                                     mediaInfo = KakaoSearchMediaBasicData(
+                                        title = "title",
+                                        url = "https://www.naver.com",
                                         thumbnailUrl = "https://pbs.twimg.com/media/Frj3K70akAAurBa?format=jpg&name=small",
                                         dateTime = Date(),
+                                        mediaType = KakaoSearchMediaType.VIDEO,
                                     )
                                 )
                             }
                         )
                     }
                 ),
-                kakaoSearchState = KakaoSearchState.IDLE,
+                kakaoSearchState = KakaoSearchUiState.IDLE,
                 queryValue = "Hello",
                 onTextInputEvent = {},
                 onQuery = {},
                 onNextPage = {
                     Toast.makeText(context, "onNextPage", Toast.LENGTH_SHORT).show()
                 },
-                onClickImage = {
+                onClickLink = {
                     Toast.makeText(context, "onClickImage", Toast.LENGTH_SHORT).show()
                 },
                 onClickFavorite = {
@@ -237,6 +249,6 @@ internal fun KakaoSearchIdlePreview() {
 @Composable
 internal fun KakaoSearchEmptyPreview() {
     AppTheme {
-        KakaoSearchEmptyColumn()
+        KakaoSearchEmpty()
     }
 }

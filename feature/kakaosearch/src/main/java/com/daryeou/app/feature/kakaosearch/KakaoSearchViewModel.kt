@@ -7,7 +7,7 @@ import com.daryeou.app.core.domain.model.ApiResult
 import com.daryeou.app.core.domain.usecase.kakao.favorite.AddKakaoFavoriteMediaItem
 import com.daryeou.app.core.domain.usecase.kakao.favorite.RemoveKakaoFavoriteMediaItem
 import com.daryeou.app.core.domain.usecase.kakao.search.GetKakaoMediaSearchSortedResult
-import com.daryeou.app.core.model.kakao.KakaoSearchMediaDetailData
+import com.daryeou.app.core.model.kakao.KakaoSearchMediaItemData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,18 +25,26 @@ class KakaoSearchViewModel @Inject constructor(
     private val removeKakaoFavoriteMediaItem: RemoveKakaoFavoriteMediaItem,
 ) : ViewModel() {
 
-    private val _KakaoMediaItemList: MutableStateFlow<KakaoSearchMediaListState> = MutableStateFlow(KakaoSearchMediaListState(false, 1, listOf()))
+    private val _kakaoSearchState: MutableStateFlow<KakaoSearchUiState> =
+        MutableStateFlow(KakaoSearchUiState.IDLE)
+    val kakaoSearchState: StateFlow<KakaoSearchUiState>
+        get() = _kakaoSearchState.asStateFlow()
+
+    private val _KakaoMediaItemList: MutableStateFlow<KakaoSearchMediaListState> =
+        MutableStateFlow(KakaoSearchMediaListState(false, 1, listOf()))
     val kakaoMediaItemList: StateFlow<KakaoSearchMediaListState>
         get() = _KakaoMediaItemList.asStateFlow()
 
-    private val _kakaoSearchState: MutableStateFlow<KakaoSearchState> = MutableStateFlow(KakaoSearchState.IDLE)
-    val kakaoSearchState: StateFlow<KakaoSearchState>
-        get() = _kakaoSearchState.asStateFlow()
-
     fun searchMedia(query: String) {
+        _kakaoSearchState.value = KakaoSearchUiState.LOADING
         viewModelScope.launch {
             getKakaoMediaSearchSortedResult(1, KakaoSearchPageSize, query).collectLatest { apiResult ->
                 when (apiResult) {
+                    /**
+                     * If [ApiResult.Success],
+                     * if the list is empty, set the state to [KakaoSearchUiState.EMPTY]
+                     * if the list is not empty, set the state to [KakaoSearchUiState.SHOW_RESULT]
+                     */
                     is ApiResult.Success -> {
                         if (apiResult.value.isEmpty()) {
                             _KakaoMediaItemList.value = KakaoSearchMediaListState(
@@ -44,19 +52,23 @@ class KakaoSearchViewModel @Inject constructor(
                                 page = 1,
                                 mediaList = listOf()
                             )
-                            _kakaoSearchState.value = KakaoSearchState.EMPTY
+                            _kakaoSearchState.value = KakaoSearchUiState.EMPTY
                         } else {
                             _KakaoMediaItemList.value = KakaoSearchMediaListState(
-                                pageable = true,
+                                pageable = apiResult.value.size >= KakaoSearchPageSize,
                                 page = 1,
                                 mediaList = apiResult.value.toList()
                             )
-                            _kakaoSearchState.value = KakaoSearchState.SHOW_RESULT
+                            _kakaoSearchState.value = KakaoSearchUiState.SHOW_RESULT
                         }
                     }
 
+                    /**
+                     * If ApiResult.Error or ApiResult.Exception,
+                     * change state to [KakaoSearchUiState.ERROR]
+                     */
                     else -> {
-                        _kakaoSearchState.value = KakaoSearchState.ERROR
+                        _kakaoSearchState.value = KakaoSearchUiState.ERROR
                     }
                 }
             }
@@ -76,26 +88,27 @@ class KakaoSearchViewModel @Inject constructor(
                         } else {
                             _KakaoMediaItemList.update { mediaListState ->
                                 mediaListState.copy(
+                                    pageable = apiResult.value.size >= KakaoSearchPageSize,
                                     page = nextPage,
                                     mediaList = mediaListState.mediaList + apiResult.value.toList()
                                 )
                             }
                         }
-                        _kakaoSearchState.value = KakaoSearchState.SHOW_RESULT
+                        _kakaoSearchState.value = KakaoSearchUiState.SHOW_RESULT
                     }
 
                     else -> {
                         _KakaoMediaItemList.update { mediaListState ->
                             mediaListState.copy(pageable = false)
                         }
-                        _kakaoSearchState.value = KakaoSearchState.ERROR
+                        _kakaoSearchState.value = KakaoSearchUiState.ERROR
                     }
                 }
             }
         }
     }
 
-    fun toggleFavorite(mediaDetailData: KakaoSearchMediaDetailData) {
+    fun toggleFavorite(mediaDetailData: KakaoSearchMediaItemData) {
         viewModelScope.launch {
             if (mediaDetailData.isFavorite) {
                 removeKakaoFavoriteMediaItem(mediaDetailData.mediaInfo)
@@ -119,12 +132,18 @@ class KakaoSearchViewModel @Inject constructor(
             }
         }
     }
+
+    // restore ui state from error
+    fun onClearError() {
+        _kakaoSearchState.value = KakaoSearchUiState.IDLE
+    }
 }
 
-const val KakaoSearchPageSize = 20
+const val KakaoSearchPageSize = 50
 
-enum class KakaoSearchState {
+enum class KakaoSearchUiState {
     IDLE,
+    LOADING,
     EMPTY,
     SHOW_RESULT,
     ERROR,

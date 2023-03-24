@@ -4,16 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,37 +17,38 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.daryeou.app.core.model.kakao.KakaoSearchMediaDetailData
-import com.daryeou.app.core.ui.KakaoMediaItemCard
+import com.daryeou.app.core.model.kakao.KakaoSearchMediaItemData
+import com.daryeou.app.core.ui.KakaoMediaItemCompatCard
 
 @Immutable
 data class KakaoSearchMediaListState(
     val pageable: Boolean,
     val page: Int,
-    val mediaList: List<KakaoSearchMediaDetailData>,
+    val mediaList: List<KakaoSearchMediaItemData>,
 )
 
-private const val CELL_COUNT = 2
-private val lastItemSpan: (LazyGridItemSpanScope) -> GridItemSpan = { GridItemSpan(CELL_COUNT) }
-
 @Composable
-internal fun KakaoSearchResultGrid(
+internal fun KakaoSearchResultColumn(
     modifier: Modifier = Modifier,
     kakaoMediaItemList: KakaoSearchMediaListState,
     onNextPage: () -> Unit,
-    onClickImage: (KakaoSearchMediaDetailData) -> Unit,
-    onClickFavorite: (KakaoSearchMediaDetailData) -> Unit,
+    onClickLink: (KakaoSearchMediaItemData) -> Unit,
+    onClickFavorite: (KakaoSearchMediaItemData) -> Unit,
 ) {
-    val gridState = rememberLazyGridState()
+    val listState = rememberLazyListState()
+
     val shouldStartPaginate by remember(kakaoMediaItemList) {
         derivedStateOf {
             kakaoMediaItemList.pageable &&
-                    (gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                    (listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
                         ?: 0) >= kakaoMediaItemList.mediaList.size - 1
         }
     }
@@ -62,39 +59,37 @@ internal fun KakaoSearchResultGrid(
         }
     }
 
-    LazyVerticalGrid(
+    LazyColumn(
         modifier = modifier,
-        state = gridState,
-        columns = GridCells.Fixed(2),
+        state = listState,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(8.dp),
     ) {
         items(
             count = kakaoMediaItemList.mediaList.size,
         ) { index ->
             val mediaItem = kakaoMediaItemList.mediaList[index]
-            KakaoMediaItemCard(
+            var expanded by rememberSaveable() { mutableStateOf(false) }
+
+            KakaoMediaItemCompatCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f),
-                detailData = mediaItem,
+                    .padding(horizontal = 10.dp),
+                itemData = mediaItem,
+                isExpanded = expanded,
+                onClickLink = onClickLink,
                 onClickImage = {
-                    onClickImage(mediaItem)
+                    expanded = !expanded
                 },
-                onClickFavorite = {
-                    onClickFavorite(mediaItem)
-                },
+                onClickFavorite = onClickFavorite,
             )
         }
 
-        item(
-            span = lastItemSpan,
-        ) {
+        item {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(140.dp)
             ) {
                 if (kakaoMediaItemList.pageable) {
                     KakaoSearchLoadingItem()
