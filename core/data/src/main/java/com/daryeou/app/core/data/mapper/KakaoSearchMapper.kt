@@ -14,6 +14,7 @@ object KakaoSearchMapper {
             KakaoSearchMediaBasicData(
                 title = item.siteName,
                 url = item.url,
+                originalUrl = item.imageUrl,
                 thumbnailUrl = item.thumbnailUrl,
                 dateTime = item.datetime,
                 mediaType = KakaoSearchMediaType.IMAGE,

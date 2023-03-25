@@ -3,7 +3,6 @@ package com.daryeou.app.feature.kakaosearch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -63,7 +62,6 @@ internal fun KakaoSearchResultColumn(
         modifier = modifier,
         state = listState,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(8.dp),
     ) {
         items(
             count = kakaoMediaItemList.mediaList.size,
@@ -74,7 +72,7 @@ internal fun KakaoSearchResultColumn(
             KakaoMediaItemCompatCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 10.dp),
+                    .wrapContentHeight(),
                 itemData = mediaItem,
                 isExpanded = expanded,
                 onClickLink = onClickLink,

@@ -134,7 +134,7 @@ class KakaoSearchViewModel @Inject constructor(
     }
 
     // restore ui state from error
-    fun onClearError() {
+    fun onClearUiState() {
         _kakaoSearchState.value = KakaoSearchUiState.IDLE
     }
 }

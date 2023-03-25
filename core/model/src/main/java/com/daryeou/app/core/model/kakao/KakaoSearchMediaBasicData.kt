@@ -5,6 +5,7 @@ import java.util.Date
 data class KakaoSearchMediaBasicData(
     val title: String,
     val url: String,
+    val originalUrl: String? = null,
     val thumbnailUrl: String,
     val dateTime: Date,
     val mediaType: KakaoSearchMediaType,
