@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="kakao_search">Search</string>
-    <string name="kakao_search_idle_description">카카오\n미디어\n검색</string>
+    <string name="kakao_search_headline">Daum에서\n사진과 영상을\n한번에 찾아보세요</string>
+    <string-array name="kakao_search_placeholder">
+        <item>Daum 검색</item>
+        <item>추억을 찾아보아요</item>
+        <item>이미지와 동영상이 한번에 검색됩니다.</item>
+    </string-array>
 
     <string name="kakao_search_media_item_empty">검색 결과가 없습니다.</string>
     <string name="kakao_search_media_item_loading">데이터를 불러오는 중입니다.</string>

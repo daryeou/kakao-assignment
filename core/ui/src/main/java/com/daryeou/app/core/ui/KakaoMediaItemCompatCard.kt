@@ -182,7 +182,7 @@ fun KakaoMediaItemCompatCard(
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = AppIcons.OpenInNew,
-                    contentDescription = "OpenWeb",
+                    contentDescription = "Open Web",
                     modifier = Modifier
                         .size(36.dp)
                         .clip(

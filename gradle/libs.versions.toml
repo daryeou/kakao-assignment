@@ -9,6 +9,7 @@ coil = "2.2.2"
 
 # compose
 androidxComposeBom = "2023.01.00"
+androidxComposeMaterial = "1.1.0-beta01"
 androidxComposeCompiler = "1.4.1"
 androidxComposeRuntimeTracing = "1.0.0-alpha01"
 androidxComposeConstraintlayout = "1.0.1"
@@ -82,7 +83,7 @@ androidx-compose-animation = { group = "androidx.compose.animation", name = "ani
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout" }
 androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "androidxComposeMaterial"}
 androidx-compose-material3-windowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata" }

@@ -142,7 +142,7 @@ fun KakaoMediaItemExpandableCard(
                 Spacer(modifier = Modifier.width(10.dp))
                 Icon(
                     imageVector = AppIcons.OpenInNew,
-                    contentDescription = "OpenWeb",
+                    contentDescription = "Open Web",
                     modifier = Modifier
                         .size(36.dp)
                         .clip(

@@ -2,30 +2,41 @@ package com.daryeou.app.feature.kakaosearch
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,14 +51,15 @@ import com.daryeou.app.core.designsystem.theme.AppTheme
 import com.daryeou.app.core.model.kakao.KakaoSearchMediaBasicData
 import com.daryeou.app.core.model.kakao.KakaoSearchMediaItemData
 import com.daryeou.app.core.model.kakao.KakaoSearchMediaType
+import kotlinx.coroutines.delay
 import java.util.Date
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 internal fun KakaoSearchScreen(
     kakaoSearchState: KakaoSearchUiState,
     kakaoSearchMediaListState: KakaoSearchMediaListState,
     queryValue: String,
+    onBackPress: () -> Unit,
     onTextInputEvent: (String) -> Unit,
     onQuery: (String) -> Unit,
     onNextPage: () -> Unit,
@@ -55,38 +67,35 @@ internal fun KakaoSearchScreen(
     onClickFavorite: (KakaoSearchMediaItemData) -> Unit,
     onSearchError: () -> Unit,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val onEnterEvent = {
-        keyboardController?.hide()
-        onQuery(queryValue)
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize(),
     ) {
-        TextField(
+        Row(
             modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 8.dp)
                 .fillMaxWidth()
-                .padding(top = 8.dp)
-                .padding(horizontal = 8.dp),
-            value = queryValue,
-            onValueChange = onTextInputEvent,
-            maxLines = 1,
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            keyboardActions = KeyboardActions(onDone = { onEnterEvent() }),
-            trailingIcon = {
+                .wrapContentHeight(),
+        ) {
+            if (kakaoSearchState != KakaoSearchUiState.IDLE) {
                 IconButton(
-                    onClick = onEnterEvent,
+                    onClick = {
+                        onBackPress()
+                    }
                 ) {
                     Icon(
-                        imageVector = AppIcons.Search,
-                        contentDescription = "Search icon"
+                        imageVector = AppIcons.ArrowBack,
+                        contentDescription = "Back Icon"
                     )
                 }
-            },
-        )
+            }
+            KakaoSearchBar(
+                queryValue = queryValue,
+                onTextInputEvent = onTextInputEvent,
+                onQuery = onQuery,
+            )
+        }
+
 
         when (kakaoSearchState) {
             KakaoSearchUiState.IDLE -> {
@@ -117,26 +126,96 @@ internal fun KakaoSearchScreen(
                 )
             }
         }
-
     }
+}
+
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class,
+    ExperimentalAnimationApi::class
+)
+@Composable
+private fun KakaoSearchBar(
+    queryValue: String,
+    onTextInputEvent: (String) -> Unit,
+    onQuery: (String) -> Unit,
+) {
+    val context = LocalContext.current
+    val placeholderTextArray =
+        remember { context.resources.getStringArray(R.array.kakao_search_placeholder) }
+    val placeholderText by produceState(initialValue = placeholderTextArray.first()) {
+        var index = 0
+        while (true) {
+            index++
+            if (index >= placeholderTextArray.size) {
+                index = 0
+            }
+            value = placeholderTextArray[index]
+            delay(3000)
+        }
+    }
+
+    var searchbarActive by rememberSaveable { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    DockedSearchBar(
+        modifier = Modifier
+            .fillMaxWidth(),
+        query = queryValue,
+        onQueryChange = onTextInputEvent,
+        active = searchbarActive,
+        onActiveChange = { active ->
+            searchbarActive = active
+        },
+        onSearch = { query ->
+            searchbarActive = false
+            onQuery(query)
+        },
+        placeholder = {
+            AnimatedContent(
+                targetState = placeholderText,
+                transitionSpec = {
+                    val contentTransform =
+                        slideInVertically { height -> height } + fadeIn() with
+                                slideOutVertically { height -> -height } + fadeOut()
+                    contentTransform.using(SizeTransform(clip = false))
+                }
+            ) { targetString ->
+                Text(
+                    text = targetString,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        },
+        trailingIcon = {
+            IconButton(
+                onClick = {
+                    keyboardController?.hide()
+                    searchbarActive = false
+                    onQuery(queryValue)
+                },
+            ) {
+                Icon(
+                    imageVector = AppIcons.Search,
+                    contentDescription = "Search Icon"
+                )
+            }
+        },
+        content = {}
+    )
 }
 
 @Composable
 private fun KakaoSearchIdleColumn() {
-    Column(
+    Text(
         modifier = Modifier
-            .fillMaxSize(),
-    ) {
-        Text(
-            modifier = Modifier
-                .padding(36.dp),
-            text = stringResource(id = R.string.kakao_search_idle_description),
-            style = MaterialTheme.typography.headlineLarge,
-            softWrap = true,
-            lineHeight = 48.sp,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
+            .padding(36.dp),
+        text = stringResource(id = R.string.kakao_search_headline),
+        style = MaterialTheme.typography.headlineLarge,
+        softWrap = true,
+        lineHeight = 48.sp,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
 
 @Composable
@@ -220,18 +299,11 @@ internal fun KakaoSearchScreenPreview() {
                 queryValue = "Hello",
                 onTextInputEvent = {},
                 onQuery = {},
-                onNextPage = {
-                    Toast.makeText(context, "onNextPage", Toast.LENGTH_SHORT).show()
-                },
-                onClickLink = {
-                    Toast.makeText(context, "onClickImage", Toast.LENGTH_SHORT).show()
-                },
-                onClickFavorite = {
-                    Toast.makeText(context, "onClickFavorite", Toast.LENGTH_SHORT).show()
-                },
-                onSearchError = {
-                    Toast.makeText(context, "onSearchError", Toast.LENGTH_SHORT).show()
-                }
+                onBackPress = {},
+                onNextPage = {},
+                onClickLink = {},
+                onClickFavorite = {},
+                onSearchError = {}
             )
         }
     }

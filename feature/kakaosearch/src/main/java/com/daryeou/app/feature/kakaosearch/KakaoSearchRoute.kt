@@ -39,6 +39,9 @@ internal fun KakaoSearchRoute(
                 viewModel.searchMedia(query)
             }
         },
+        onBackPress = {
+            TODO()
+        },
         onNextPage = {
             viewModel.searchMediaNextPage()
         },
