@@ -103,10 +103,7 @@ class KakaoSearchViewModel @Inject constructor(
             }
 
             _KakaoMediaItemList.update { previousSearchMediaListState ->
-                KakaoSearchMediaListState(
-                    query = previousSearchMediaListState.query,
-                    pageable = previousSearchMediaListState.pageable,
-                    page = previousSearchMediaListState.page,
+                previousSearchMediaListState.copy(
                     mediaList = previousSearchMediaListState.mediaList.toMutableList().apply {
                         val index = indexOfFirst { previousMediaDetailData ->
                             previousMediaDetailData.mediaInfo == mediaDetailData.mediaInfo
