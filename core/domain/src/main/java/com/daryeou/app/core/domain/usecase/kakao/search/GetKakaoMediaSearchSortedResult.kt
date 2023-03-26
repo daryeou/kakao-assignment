@@ -1,8 +1,8 @@
 package com.daryeou.app.core.domain.usecase.kakao.search
 
-import android.util.Log
 import com.daryeou.app.core.domain.entities.kakao.search.KakaoSearchEntity
 import com.daryeou.app.core.domain.model.ApiResult
+import com.daryeou.app.core.domain.model.kakao.KakaoMediaSearchModel
 import com.daryeou.app.core.domain.repository.KakaoSearchRepo
 import com.daryeou.app.core.domain.repository.KakaoSearchSortType
 import com.daryeou.app.core.model.kakao.KakaoSearchMediaBasicData
@@ -12,6 +12,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -24,34 +25,31 @@ private data class KakaoMediaSearchApiState(
 )
 
 class GetKakaoMediaSearchSortedResult @Inject constructor(
-    private val kakaoSearchRepo: KakaoSearchRepo
+    private val kakaoSearchRepo: KakaoSearchRepo,
 ) {
     private var currentPageSize = 30
     private var currentQuery: String = ""
 
-    private lateinit var favoriteMediaList: List<KakaoSearchMediaBasicData>
-
     private var imageSearchApiState: KakaoMediaSearchApiState = KakaoMediaSearchApiState()
     private var videoSearchApiState: KakaoMediaSearchApiState = KakaoMediaSearchApiState()
 
-    private val kakaoSearchMixedListSorted = mutableListOf<KakaoSearchMediaItemData>()
+    private val kakaoSearchMixedListSorted = mutableListOf<KakaoSearchMediaBasicData>()
 
+    /**
+     * Get sorted media search result
+     */
     operator fun invoke(
         page: Int,
         pageSize: Int = currentPageSize,
         query: String = currentQuery,
-    ): Flow<ApiResult<List<KakaoSearchMediaItemData>>> = channelFlow {
-        if (currentQuery != query) {
+        refresh: Boolean = false,
+    ): Flow<ApiResult<KakaoMediaSearchModel>> = channelFlow {
+        if (currentQuery != query || refresh) {
             currentPageSize = pageSize
             currentQuery = query
             imageSearchApiState = KakaoMediaSearchApiState()
             videoSearchApiState = KakaoMediaSearchApiState()
             kakaoSearchMixedListSorted.clear()
-
-            // Get favorite media list
-            kakaoSearchRepo.getKakaoFavoriteItemList().collectLatest { favoriteList ->
-                favoriteMediaList = favoriteList.itemList
-            }
         }
 
         // Combine two search result
@@ -78,7 +76,7 @@ class GetKakaoMediaSearchSortedResult @Inject constructor(
                 listOf(
                     imageSearchApiState,
                     videoSearchApiState,
-                ).forEach {  apiState ->
+                ).forEach { apiState ->
                     launch {
                         apiState.apply {
                             // Get image search result
@@ -100,7 +98,6 @@ class GetKakaoMediaSearchSortedResult @Inject constructor(
                                          */
                                         if (apiResult is ApiResult.Error) {
                                             send(apiResult)
-                                            pageable = false
                                         } else if (apiResult is ApiResult.Exception) {
                                             send(apiResult)
                                         }
@@ -113,7 +110,15 @@ class GetKakaoMediaSearchSortedResult @Inject constructor(
                 }
             }
 
-            val tempMixedList = mutableListOf<KakaoSearchMediaItemData>()
+            // Check api limit page
+            if (imageSearchApiState.nextPage > ImagePageLimit) {
+                imageSearchApiState.pageable = false
+            }
+            if (videoSearchApiState.nextPage > VideoPageLimit) {
+                videoSearchApiState.pageable = false
+            }
+
+            val tempMixedList = mutableListOf<KakaoSearchMediaBasicData>()
             lateinit var hasLessDateType: MutableList<KakaoSearchMediaBasicData>
             lateinit var hasMoreDateType: MutableList<KakaoSearchMediaBasicData>
 
@@ -138,54 +143,67 @@ class GetKakaoMediaSearchSortedResult @Inject constructor(
             val lastDateTime = hasLessDateType.last().dateTime
 
             // Add last date type to mixed list, and remove it from original list
-            hasLessDateType.forEach { basicData ->
-                tempMixedList.add(
-                    KakaoSearchMediaItemData(
-                        favoriteMediaList.contains(basicData),
-                        basicData,
-                    )
-                )
-            }
+            tempMixedList.addAll(hasLessDateType)
             hasLessDateType.clear()
 
             // Add more date type to mixed list, and remove it from original list
             hasMoreDateType.toList().forEach { basicData ->
                 if (basicData.dateTime > lastDateTime) {
-                    tempMixedList.add(
-                        KakaoSearchMediaItemData(
-                            favoriteMediaList.contains(basicData),
-                            basicData,
-                        )
-                    )
+                    tempMixedList.add(basicData)
                     hasMoreDateType.remove(basicData)
                 }
             }
 
             // Sort mixed list
-            tempMixedList.sortByDescending { detailData ->
-                detailData.mediaInfo.dateTime
+            tempMixedList.sortByDescending { mediaBasicData ->
+                mediaBasicData.dateTime
             }
 
             kakaoSearchMixedListSorted.addAll(tempMixedList)
         }
 
+        // Get favorite list
+        val favoriteList = getFavoriteList()
+
         // Send result
         if (kakaoSearchMixedListSorted.size >= (page - 1) * pageSize) {
-            send(
-                ApiResult.Success(
-                    kakaoSearchMixedListSorted.subList(
-                        (page - 1) * pageSize,
-                        (page * pageSize).coerceAtMost(kakaoSearchMixedListSorted.size)
-                    ).toList()
-                )
-            )
-        } else {
-            send(
-                ApiResult.Success(
-                    emptyList()
-                )
-            )
-        }
+            val itemSortedList: List<KakaoSearchMediaItemData> = kakaoSearchMixedListSorted
+                .subList(0, (page * pageSize).coerceAtMost(kakaoSearchMixedListSorted.size))
+                .map { mediaBasicData ->
+                    KakaoSearchMediaItemData(
+                        favoriteList.contains(mediaBasicData),
+                        mediaBasicData
+                    )
+                }
 
+            if (imageSearchApiState.pageable || videoSearchApiState.pageable) {
+                send(
+                    ApiResult.Success(
+                        KakaoMediaSearchModel(
+                            isEnd = false,
+                            itemList = itemSortedList
+                        )
+                    )
+                )
+            } else {
+                send(
+                    ApiResult.Success(
+                        KakaoMediaSearchModel(
+                            isEnd = true,
+                            itemList = itemSortedList
+                        )
+                    )
+                )
+            }
+        } else {
+            send(ApiResult.Exception(Exception("No more data")))
+        }
+    }
+
+    private suspend fun getFavoriteList(): List<KakaoSearchMediaBasicData> {
+        return kakaoSearchRepo.getKakaoFavoriteItemList().first().itemList
     }
 }
+
+const private val ImagePageLimit = 50
+const private val VideoPageLimit = 15

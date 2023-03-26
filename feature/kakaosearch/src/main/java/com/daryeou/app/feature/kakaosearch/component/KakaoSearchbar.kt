@@ -19,10 +19,8 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,8 +38,10 @@ import kotlinx.coroutines.delay
 internal fun KakaoSearchBar(
     modifier: Modifier = Modifier,
     active: Boolean = false,
+    query: String = "",
+    onQueryChange: (String) -> Unit,
     onActiveChange: (Boolean) -> Unit = {},
-    onQuery: (String) -> Unit,
+    onQuery: () -> Unit,
     showBackButton: Boolean = false,
     onBackPress: () -> Unit = {},
 ) {
@@ -61,17 +61,17 @@ internal fun KakaoSearchBar(
         }
     }
 
-    var queryValue by remember { mutableStateOf("") }
+
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val onSearch = {
         keyboardController?.hide()
-        onQuery(queryValue)
+        onQuery()
     }
 
     val onBackPressEvent = {
         keyboardController?.hide()
-        queryValue = ""
+        onQueryChange("")
         onBackPress()
     }
 
@@ -83,9 +83,9 @@ internal fun KakaoSearchBar(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight(),
-        query = queryValue,
-        onQueryChange = { query ->
-            queryValue = query
+        query = query,
+        onQueryChange = { textInput ->
+            onQueryChange(textInput)
         },
         active = active,
         onActiveChange = onActiveChange,

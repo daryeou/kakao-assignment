@@ -41,7 +41,7 @@ fun KakaoApp(
                             inclusive = true
                         }
                         launchSingleTop = true
-                        restoreState = false
+                        restoreState = true
                     }
                 },
                 currentDestination = backStackEntry?.destination

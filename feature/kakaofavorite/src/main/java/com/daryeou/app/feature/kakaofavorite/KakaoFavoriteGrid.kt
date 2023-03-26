@@ -3,7 +3,6 @@ package com.daryeou.app.feature.kakaofavorite
 import KakaoMediaItemFixedCard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -60,14 +59,13 @@ internal fun KakaoFavoriteGrid(
                             outPositions[index] = totalSize - size
                         } else {
                             outPositions[index] = currentOffset
-                            currentOffset += size + 8.dp.roundToPx()
+                            currentOffset += (size + 8.dp.toPx()).toInt()
                         }
                     }
                 }
             }
         },
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(8.dp),
     ) {
         items(
             count = kakaoMediaItemList.mediaList.size,

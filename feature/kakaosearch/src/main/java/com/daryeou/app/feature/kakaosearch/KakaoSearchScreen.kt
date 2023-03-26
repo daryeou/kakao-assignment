@@ -7,13 +7,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -28,12 +31,14 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.daryeou.app.core.designsystem.component.ErrorScreen
 import com.daryeou.app.core.designsystem.component.LoadingWheel
 import com.daryeou.app.core.designsystem.theme.AppTheme
 import com.daryeou.app.core.model.kakao.KakaoSearchMediaBasicData
 import com.daryeou.app.core.model.kakao.KakaoSearchMediaItemData
 import com.daryeou.app.core.model.kakao.KakaoSearchMediaType
 import com.daryeou.app.feature.kakaosearch.component.KakaoSearchBar
+import kotlinx.coroutines.launch
 import java.util.Date
 
 @Composable
@@ -41,17 +46,40 @@ internal fun KakaoSearchScreen(
     kakaoSearchState: KakaoSearchUiState,
     kakaoSearchMediaListState: KakaoSearchMediaListState,
     onQuery: (String) -> Unit,
-    onNextPage: () -> Unit,
+    onNextPage: (String, Int) -> Unit,
     onClickFavorite: (KakaoSearchMediaItemData) -> Unit,
     onClearState: () -> Unit,
     onError: (String) -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val uiState = remember(kakaoSearchState) {
+        derivedStateOf {
+            kakaoSearchState
+        }
+    }
+
     val uriHandler = LocalUriHandler.current
 
     val queryLengthErrorMessage = stringResource(id = R.string.kakao_search_query_length_error)
     val searchErrorMessage = stringResource(id = R.string.kakao_search_api_error)
 
     var showBackButton by rememberSaveable { mutableStateOf(false) }
+
+    var queryValue by rememberSaveable { mutableStateOf("") }
+
+    val listState = rememberLazyListState()
+
+    val onSearchEvent = {
+        if (queryValue.isEmpty()) {
+            onError(queryLengthErrorMessage)
+        } else if (kakaoSearchState != KakaoSearchUiState.LOADING) {
+            onQuery(queryValue)
+            showBackButton = true
+            coroutineScope.launch {
+                listState.scrollToItem(0)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -63,14 +91,11 @@ internal fun KakaoSearchScreen(
                 .fillMaxWidth()
                 .wrapContentHeight(),
             active = false,
-            onQuery = { query ->
-                if (query.isEmpty()) {
-                    onError(queryLengthErrorMessage)
-                } else if (kakaoSearchState != KakaoSearchUiState.LOADING) {
-                    onQuery(query)
-                    showBackButton = true
-                }
+            query = queryValue,
+            onQueryChange = { query ->
+                queryValue = query
             },
+            onQuery = onSearchEvent,
             showBackButton = showBackButton,
             onBackPress = {
                 onClearState()
@@ -78,7 +103,7 @@ internal fun KakaoSearchScreen(
             },
         )
 
-        when (kakaoSearchState) {
+        when (uiState.value) {
             KakaoSearchUiState.IDLE -> {
                 KakaoSearchIdleColumn()
             }
@@ -93,6 +118,13 @@ internal fun KakaoSearchScreen(
 
             KakaoSearchUiState.ERROR -> {
                 onError(searchErrorMessage)
+                ErrorScreen(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth()
+                        .weight(1f),
+                    onRetry = onSearchEvent,
+                )
             }
 
             KakaoSearchUiState.SHOW_RESULT -> {
@@ -101,8 +133,11 @@ internal fun KakaoSearchScreen(
                         .padding(horizontal = 16.dp)
                         .fillMaxWidth()
                         .weight(1f),
+                    listState = listState,
                     kakaoMediaItemList = kakaoSearchMediaListState,
-                    onNextPage = onNextPage,
+                    onNextPage = { page ->
+                        onNextPage(queryValue, page)
+                    },
                     onClickLink = { mediaDetailData ->
                         uriHandler.openUri(mediaDetailData.mediaInfo.url)
                     },
@@ -156,7 +191,6 @@ private fun KakaoSearchEmpty() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview(
     showBackground = true,
@@ -172,6 +206,7 @@ internal fun KakaoSearchScreenPreview() {
         ) { _ ->
             KakaoSearchScreen(
                 kakaoSearchMediaListState = KakaoSearchMediaListState(
+                    query = "",
                     pageable = true,
                     page = 1,
                     mediaList = MutableList(10) {
@@ -189,7 +224,7 @@ internal fun KakaoSearchScreenPreview() {
                 ),
                 kakaoSearchState = KakaoSearchUiState.IDLE,
                 onQuery = {},
-                onNextPage = {},
+                onNextPage = { _, _ -> },
                 onClickFavorite = {},
                 onClearState = {},
                 onError = {},

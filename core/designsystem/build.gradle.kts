@@ -25,6 +25,8 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.androidx.compose)
 
+    implementation(libs.lottie.compose)
+
     testImplementation(libs.junit4)
 
     androidTestImplementation(libs.androidx.test.ext)

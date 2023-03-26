@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -29,6 +30,7 @@ import com.daryeou.app.core.ui.KakaoMediaItemCompatCard
 
 @Immutable
 data class KakaoSearchMediaListState(
+    val query: String,
     val pageable: Boolean,
     val page: Int,
     val mediaList: List<KakaoSearchMediaItemData>,
@@ -38,12 +40,11 @@ data class KakaoSearchMediaListState(
 internal fun KakaoSearchResultColumn(
     modifier: Modifier = Modifier,
     kakaoMediaItemList: KakaoSearchMediaListState,
-    onNextPage: () -> Unit,
+    listState: LazyListState = rememberLazyListState(),
+    onNextPage: (page: Int) -> Unit,
     onClickLink: (KakaoSearchMediaItemData) -> Unit,
     onClickFavorite: (KakaoSearchMediaItemData) -> Unit,
 ) {
-    val listState = rememberLazyListState()
-
     val shouldStartPaginate by remember(kakaoMediaItemList) {
         derivedStateOf {
             kakaoMediaItemList.pageable &&
@@ -54,7 +55,7 @@ internal fun KakaoSearchResultColumn(
 
     LaunchedEffect(shouldStartPaginate) {
         if (shouldStartPaginate) {
-            onNextPage()
+            onNextPage(kakaoMediaItemList.page + 1)
         }
     }
 
@@ -65,6 +66,7 @@ internal fun KakaoSearchResultColumn(
     ) {
         items(
             count = kakaoMediaItemList.mediaList.size,
+            key = { index -> index },
         ) { index ->
             val mediaItem = kakaoMediaItemList.mediaList[index]
             var expanded by rememberSaveable() { mutableStateOf(false) }

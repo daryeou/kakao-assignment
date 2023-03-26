@@ -27,6 +27,7 @@ dependencies {
 
     implementation(libs.bundles.retrofit)
     implementation(libs.bundles.retrofit.serialization)
+    implementation(libs.okhttp3.logging.interceptor)
 
     testImplementation(libs.junit4)
 

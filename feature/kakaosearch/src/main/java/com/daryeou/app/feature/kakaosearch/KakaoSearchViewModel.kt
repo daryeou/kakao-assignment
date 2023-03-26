@@ -31,14 +31,31 @@ class KakaoSearchViewModel @Inject constructor(
         get() = _kakaoSearchState.asStateFlow()
 
     private val _KakaoMediaItemList: MutableStateFlow<KakaoSearchMediaListState> =
-        MutableStateFlow(KakaoSearchMediaListState(false, 1, listOf()))
+        MutableStateFlow(KakaoSearchMediaListState("", false, 1, listOf()))
     val kakaoMediaItemList: StateFlow<KakaoSearchMediaListState>
         get() = _KakaoMediaItemList.asStateFlow()
 
-    fun searchMedia(query: String) {
+    fun onRefresh() {
+        val itemState = _KakaoMediaItemList.value
+        if (itemState.query.isNotEmpty()) {
+            searchMedia(itemState.query, itemState.page)
+        }
+    }
+
+    fun onQuery(query: String) {
         _kakaoSearchState.value = KakaoSearchUiState.LOADING
+        if (query.isNotEmpty()) {
+            searchMedia(query, 1, true)
+        }
+    }
+
+    fun onNextPage(query: String, page: Int) {
+        searchMedia(query, page)
+    }
+
+    private fun searchMedia(query: String, totalPage: Int, refresh: Boolean = false) {
         viewModelScope.launch {
-            getKakaoMediaSearchSortedResult(1, KakaoSearchPageSize, query).collectLatest { apiResult ->
+            getKakaoMediaSearchSortedResult(totalPage, KakaoSearchPageSize, query, refresh).collectLatest { apiResult ->
                 when (apiResult) {
                     /**
                      * If [ApiResult.Success],
@@ -46,8 +63,9 @@ class KakaoSearchViewModel @Inject constructor(
                      * if the list is not empty, set the state to [KakaoSearchUiState.SHOW_RESULT]
                      */
                     is ApiResult.Success -> {
-                        if (apiResult.value.isEmpty()) {
+                        if (apiResult.value.itemList.isEmpty()) {
                             _KakaoMediaItemList.value = KakaoSearchMediaListState(
+                                query = "",
                                 pageable = false,
                                 page = 1,
                                 mediaList = listOf()
@@ -55,9 +73,10 @@ class KakaoSearchViewModel @Inject constructor(
                             _kakaoSearchState.value = KakaoSearchUiState.EMPTY
                         } else {
                             _KakaoMediaItemList.value = KakaoSearchMediaListState(
-                                pageable = apiResult.value.size >= KakaoSearchPageSize,
-                                page = 1,
-                                mediaList = apiResult.value.toList()
+                                query = query,
+                                pageable = apiResult.value.isEnd.not(),
+                                page = totalPage,
+                                mediaList = apiResult.value.itemList
                             )
                             _kakaoSearchState.value = KakaoSearchUiState.SHOW_RESULT
                         }
@@ -75,39 +94,6 @@ class KakaoSearchViewModel @Inject constructor(
         }
     }
 
-    fun searchMediaNextPage() {
-        viewModelScope.launch {
-            val nextPage = _KakaoMediaItemList.value.page + 1
-            getKakaoMediaSearchSortedResult(nextPage).collectLatest { apiResult ->
-                when (apiResult) {
-                    is ApiResult.Success -> {
-                        if (apiResult.value.isEmpty()) {
-                            _KakaoMediaItemList.update { mediaListState ->
-                                mediaListState.copy(pageable = false)
-                            }
-                        } else {
-                            _KakaoMediaItemList.update { mediaListState ->
-                                mediaListState.copy(
-                                    pageable = apiResult.value.size >= KakaoSearchPageSize,
-                                    page = nextPage,
-                                    mediaList = mediaListState.mediaList + apiResult.value.toList()
-                                )
-                            }
-                        }
-                        _kakaoSearchState.value = KakaoSearchUiState.SHOW_RESULT
-                    }
-
-                    else -> {
-                        _KakaoMediaItemList.update { mediaListState ->
-                            mediaListState.copy(pageable = false)
-                        }
-                        _kakaoSearchState.value = KakaoSearchUiState.ERROR
-                    }
-                }
-            }
-        }
-    }
-
     fun toggleFavorite(mediaDetailData: KakaoSearchMediaItemData) {
         viewModelScope.launch {
             if (mediaDetailData.isFavorite) {
@@ -118,6 +104,7 @@ class KakaoSearchViewModel @Inject constructor(
 
             _KakaoMediaItemList.update { previousSearchMediaListState ->
                 KakaoSearchMediaListState(
+                    query = previousSearchMediaListState.query,
                     pageable = previousSearchMediaListState.pageable,
                     page = previousSearchMediaListState.page,
                     mediaList = previousSearchMediaListState.mediaList.toMutableList().apply {

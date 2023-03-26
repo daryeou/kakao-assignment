@@ -1,5 +1,6 @@
 package com.daryeou.app.core.network.di
 
+import android.util.Log
 import com.daryeou.app.core.network.BuildConfig
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -14,6 +15,7 @@ import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Response
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Named
@@ -35,7 +37,12 @@ object NetworkModule {
                 @OptIn(ExperimentalSerializationApi::class)
                 networkJson.asConverterFactory("application/json".toMediaType()),
             )
-            .client(provideOkHttpClient(InterceptorForKakao()))
+            .client(
+                provideOkHttpClient(
+                    InterceptorForKakao(),
+                    httpLoggingInterceptor
+                )
+            )
             .build()
 
     // e.g. 2011-09-14T01:39:00.000+09:00
@@ -47,11 +54,9 @@ object NetworkModule {
         ignoreUnknownKeys = true
     }
 
-    private fun provideOkHttpClient(interceptor: Interceptor? = null): OkHttpClient =
+    private fun provideOkHttpClient(vararg interceptor: Interceptor): OkHttpClient =
         OkHttpClient.Builder().run {
-            interceptor?.also { interceptor ->
-                addInterceptor(interceptor)
-            }
+            interceptor.forEach { addInterceptor(it) }
             build()
         }
 
@@ -62,6 +67,12 @@ object NetworkModule {
                 .build()
             proceed(newRequest)
         }
+    }
+
+    var httpLoggingInterceptor = HttpLoggingInterceptor { log ->
+        Log.d("OkHttp", log)
+    }.apply {
+        level = HttpLoggingInterceptor.Level.BODY
     }
 }
 
