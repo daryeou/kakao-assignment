@@ -120,6 +120,7 @@ class KakaoSearchViewModel @Inject constructor(
     // restore ui state from error
     fun onClearUiState() {
         _kakaoSearchState.value = KakaoSearchUiState.IDLE
+        _KakaoMediaItemList.value = KakaoSearchMediaListState("", false, 1, listOf())
     }
 }
 
