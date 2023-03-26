@@ -1,6 +1,6 @@
 # 카카오뱅크 안드로이드 과제
 
-## 🚧Github에 업로드 된 자료는 API KEY 값을 포함하지 않으므로 실제로 동작하지 않습니다.🚧 ##
+## 🚧Github에 업로드 된 자료는 API KEY 값을 포함하지 않으므로 하단 방법을 통해 'secrets.defaults.properties'에 추가해야 합니다.🚧 ##
  
 ![banner](screenshots/preview.jpg)<br>
 
