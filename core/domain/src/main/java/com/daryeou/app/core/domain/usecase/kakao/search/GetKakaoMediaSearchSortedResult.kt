@@ -24,6 +24,9 @@ private data class KakaoMediaSearchApiState(
     var apiFlow: Flow<ApiResult<KakaoSearchEntity>>? = null,
 )
 
+/**
+ * Use case to get the image and video search result from Kakao API
+ */
 class GetKakaoMediaSearchSortedResult @Inject constructor(
     private val kakaoSearchRepo: KakaoSearchRepo,
 ) {
@@ -37,6 +40,10 @@ class GetKakaoMediaSearchSortedResult @Inject constructor(
 
     /**
      * Get sorted media search result
+     * @param page The page number
+     * @param pageSize The size of the page
+     * @param query The query to search
+     * @param refresh If true, refresh the search result
      */
     operator fun invoke(
         page: Int,

@@ -13,16 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.daryeou.app.KakaoViewModel
 import com.daryeou.app.core.designsystem.component.AppNavigationBar
 import com.daryeou.app.core.designsystem.component.AppNavigationBarItem
 import com.daryeou.app.navigation.KakaoNavHost
 import com.daryeou.app.navigation.TopLevelDestination
 
 @Composable
-fun KakaoApp(
-    viewModel: KakaoViewModel,
-) {
+fun KakaoApp() {
     val navHostController = rememberNavController()
     val backStackEntry by navHostController.currentBackStackEntryAsState()
 
