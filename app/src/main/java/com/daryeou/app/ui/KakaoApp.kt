@@ -38,7 +38,7 @@ fun KakaoApp(
                     navHostController.navigate(destination.route) {
                         popUpTo(navHostController.graph.startDestinationId) {
                             saveState = true
-                            inclusive = true
+                            inclusive = false
                         }
                         launchSingleTop = true
                         restoreState = true
