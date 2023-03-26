@@ -83,6 +83,11 @@ Gson 라이브러리를 사용하여, Data class를 Json 형식의 문자열로 
 
 각 화면이 노출 될 때, LaunchEffect를 통해 동기화 하는 과정을 추가하였습니다.
 
+### API KEY 관리 ###
+
+'Secrets Gradle plugin'을 적용하여 root 폴더의 'secrets.defaults.properties'로 부터 API KEY를 가져옵니다.
+공개 Repository에는 이 파일을 포함하지 않습니다.
+
 ## ❓ Question ##
 
 ### XML View VS Jetpack Compose ###
