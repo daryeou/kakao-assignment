@@ -1,7 +1,5 @@
 # 카카오뱅크 안드로이드 과제
 
-https://github.com/daryeou/kakao-assignment
-
 ## 🚧Github에 업로드 된 자료는 API KEY 값을 포함하지 않으므로 실제로 동작하지 않습니다.🚧 ##
  
 ![banner](screenshots/preview.jpg)<br>
@@ -78,8 +76,9 @@ Gson 라이브러리를 사용하여, Data class를 Json 형식의 문자열로 
 
 ### Paging3 VS without Paging3 ###
 
-적절한 타이밍에 호출하고, Domain 레이어에서의 변형의 용이성을 늘리기 위해 without Paging3를 선택
-그러나 Paging3 라이브러리를 사용하는 것이 개발 시간 단축에 도움이 됬을 것이라고 생각합니다.
+적절한 타이밍에 호출하고, Domain 레이어에서의 변형의 용이성을 늘리기 위해 without Paging3를 선택하였습니다.
+
+그러나 Paging3 라이브러리를 사용하는 것이 개발 시간 단축에 도움이 됐을 것이라고 생각합니다.
 
 ### '좋아요'화면과 검색 화면간의 동기화 문제 ###
 
@@ -88,6 +87,7 @@ Gson 라이브러리를 사용하여, Data class를 Json 형식의 문자열로 
 ### API KEY 관리 ###
 
 'Secrets Gradle plugin'을 적용하여 root 폴더의 'secrets.defaults.properties'로 부터 API KEY를 가져옵니다.
+
 공개 Repository에는 이 파일을 포함하지 않습니다.
 
 ## ❓ Question ##
