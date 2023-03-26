@@ -35,6 +35,22 @@
 오픈 소스 사용 가능합니다. 참고로 카카오뱅크에서는 retrofit, kotlinx-coroutines-android, rxjava 등을 사용하고 있습니다.
 ```
 
+## 🚥 How to build ##
+
+빌드 전, 'secrets.defaults.properties'에 다음과 같이 API KEY 값을 추가해야 합니다.
+```
+# secrets.defaults.properties
+KAKAO_API_URL="https://dapi.kakao.com/"
+KAKAO_API_KEY="KakaoAK {Kakao API KEY}
+```
+
+e.g.
+```
+# secrets.defaults.properties
+KAKAO_API_URL="https://dapi.kakao.com/"
+KAKAO_API_KEY="KakaoAK d87cd5634a458257e3d4asdens2f35"
+```
+
 ## ⚡Stack ##
 <img src="https://img.shields.io/badge/Kotlin1.8-7F52FF?style=for-the-badge&logo=Kotlin&logoColor=white"> <img src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=Android&logoColor=white"> <img src="https://img.shields.io/badge/Jetpack Compose-4285F4?style=for-the-badge&logo=Jetpack Compose&logoColor=white"> <img src="https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=Gradle&logoColor=white">
 
@@ -87,7 +103,6 @@ Gson 라이브러리를 사용하여, Data class를 Json 형식의 문자열로 
 ### API KEY 관리 ###
 
 'Secrets Gradle plugin'을 적용하여 root 폴더의 'secrets.defaults.properties'로 부터 API KEY를 가져옵니다.
-
 공개 Repository에는 이 파일을 포함하지 않습니다.
 
 ## ❓ Question ##
