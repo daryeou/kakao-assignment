@@ -10,7 +10,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun KakaoFavoriteRoute(
     viewModel: KakaoFavoriteViewModel = hiltViewModel(),
-    showSnackbar: (String) -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -33,6 +32,5 @@ fun KakaoFavoriteRoute(
         onClickFavorite = { mediaItemData ->
             viewModel.removeKakaoFavoriteItem(mediaItemData)
         },
-        showSnackbar = showSnackbar,
     )
 }

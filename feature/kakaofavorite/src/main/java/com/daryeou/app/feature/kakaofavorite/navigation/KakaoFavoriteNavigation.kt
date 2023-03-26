@@ -12,14 +12,10 @@ fun NavController.navigateToKakaoFavorite(navOptions: NavOptionsBuilder.() -> Un
     this.navigate(kakaoFavoriteNavigationRoute, navOptions)
 }
 
-fun NavGraphBuilder.kakaoFavoriteScreen(
-    showSnackbar: (String) -> Unit,
-) {
+fun NavGraphBuilder.kakaoFavoriteScreen() {
     composable(
         route = kakaoFavoriteNavigationRoute,
     ) { _ ->
-        KakaoFavoriteRoute(
-            showSnackbar = showSnackbar,
-        )
+        KakaoFavoriteRoute()
     }
 }

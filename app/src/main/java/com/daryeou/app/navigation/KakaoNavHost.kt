@@ -29,11 +29,7 @@ internal fun KakaoNavHost(
                 snackbarHostState.showMessage(coroutineScope, errorMsg)
             },
         )
-        kakaoFavoriteScreen(
-            showSnackbar = { errorMsg ->
-                snackbarHostState.showMessage(coroutineScope, errorMsg)
-            },
-        )
+        kakaoFavoriteScreen()
     }
 }
 

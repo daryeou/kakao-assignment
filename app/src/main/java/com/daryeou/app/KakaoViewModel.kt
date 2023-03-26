@@ -6,5 +6,5 @@ import javax.inject.Inject
 
 @HiltViewModel
 class KakaoViewModel @Inject constructor() : ViewModel() {
-    // nothing
+    // TODO: Control the UI state
 }

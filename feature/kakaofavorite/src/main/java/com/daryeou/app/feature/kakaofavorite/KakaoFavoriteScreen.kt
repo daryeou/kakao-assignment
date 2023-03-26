@@ -30,7 +30,6 @@ internal fun KakaoFavoriteScreen(
     onClickLink: (KakaoSearchMediaItemData) -> Unit,
     onClickImage: (KakaoSearchMediaItemData) -> Unit,
     onClickFavorite: (KakaoSearchMediaItemData) -> Unit,
-    showSnackbar: (String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -102,7 +101,6 @@ internal fun KakaoFavoriteScreenPreview() {
             onClickLink = {},
             onClickImage = {},
             onClickFavorite = {},
-            showSnackbar = {},
         )
     }
 }
