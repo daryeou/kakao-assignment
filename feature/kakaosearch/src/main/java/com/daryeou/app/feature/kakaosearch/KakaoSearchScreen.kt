@@ -61,7 +61,6 @@ internal fun KakaoSearchScreen(
     val uriHandler = LocalUriHandler.current
 
     val queryLengthErrorMessage = stringResource(id = R.string.kakao_search_query_length_error)
-    val searchErrorMessage = stringResource(id = R.string.kakao_search_api_error)
 
     var showBackButton by rememberSaveable { mutableStateOf(false) }
 
@@ -117,7 +116,6 @@ internal fun KakaoSearchScreen(
             }
 
             KakaoSearchUiState.ERROR -> {
-                onError(searchErrorMessage)
                 ErrorScreen(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
