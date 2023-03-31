@@ -36,6 +36,7 @@
 ```
 
 ## 🚥 How to build ##
+AGP 버전 상, Android Studio Flamingo를 사용하여 Build가 가능합니다.
 
 빌드 전, 'secrets.defaults.properties'에 다음과 같이 API KEY 값을 추가해야 합니다.
 ```
