@@ -18,7 +18,7 @@ androidxComposeRuntimePaging = "3.1.1"
 androidxComposePaging = "1.0.0-alpha18"
 
 # gradle
-androidGradlePlugin = "8.0.0-alpha09"
+androidGradlePlugin = "7.4.1"
 
 # hilt
 hilt = "2.45"
@@ -52,6 +52,9 @@ secretGradlePlugin = "2.0.1"
 junit4 = "4.13.2"
 androidxTestExt = "1.1.4"
 androidxEspresso = "3.5.0"
+junit = "1.1.5"
+appcompat = "1.6.1"
+material = "1.8.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin"}
@@ -136,6 +139,9 @@ androidx-test-ext = { group = "androidx.test.ext", name = "junit-ktx", version.r
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
+junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 # Dependencies of the included build-logic
 #android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
