@@ -17,6 +17,10 @@ android {
     buildFeatures {
         compose = true
     }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        freeCompilerArgs = listOf("-Xcontext-receivers")
+    }
 }
 
 dependencies {

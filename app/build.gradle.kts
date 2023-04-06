@@ -40,12 +40,8 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
         freeCompilerArgs = listOf("-Xcontext-receivers")
     }
     buildFeatures {
@@ -64,8 +60,6 @@ android {
     }
     buildFeatures {
         buildConfig = true
-        dataBinding = true
-        viewBinding = true
     }
 }
 
